@@ -221,6 +221,42 @@ if (!sock.authState.creds.registered) {
   })
 }
 
-startBot()
+async function startBot() {
+  const { state, saveCreds } = await useMultiFileAuthState('auth_info')
+
+  const sock = makeWASocket({
+    auth: state,
+    printQRInTerminal: false,
+    logger: pino({ level: 'silent' })
+  })
+
+  sock.ev.on('connection.update', async (update) => {
+    const { connection, lastDisconnect } = update
+
+    if (connection === 'open') {
+      console.log('✅ Connected to WhatsApp!')
+    }
+
+    if (connection === 'close') {
+      console.log('🔄 Reconnecting...')
+      startBot()
+    }
+
+    if (connection === 'connecting') {
+      console.log('⏳ Connecting to WhatsApp...')
+      if (!sock.authState.creds.registered) {
+        await new Promise(r => setTimeout(r, 8000))
+        try {
+          const number = '2349016105277'
+          console.log(`Requesting pairing code for ${number}...`)
+          const code = await sock.requestPairingCode(number)
+          console.log(`🔑 YOUR PAIRING CODE IS: ${code}`)
+          console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
+        } catch (err) {
+          console.log('Pairing code error:', err.message)
+        }
+      }
+    }
+  })
 
 http.createServer((req, res) => res.end('Bot is running!')).listen(process.env.PORT || 3000)
