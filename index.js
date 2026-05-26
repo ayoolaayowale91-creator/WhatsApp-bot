@@ -2,6 +2,7 @@ const { default: makeWASocket, useMultiFileAuthState } = require('@whiskeysocket
 const pino = require('pino')
 const config = require('./config')
 const axios = require('axios')
+const http = require('http')
 
 const warnings = {}
 
@@ -14,13 +15,25 @@ async function startBot() {
     logger: pino({ level: 'silent' })
   })
 
-if (!sock.authState.creds.registered) {
-    await new Promise(r => setTimeout(r, 3000))
+  sock.ev.on('connection.update', async (update) => {
+    const { connection } = update
+    if (connection === 'open') {
+      console.log('✅ Connected to WhatsApp!')
+    }
+    if (connection === 'close') {
+      console.log('🔄 Connection closed, reconnecting...')
+      startBot()
+    }
+  })
+
+  if (!sock.authState.creds.registered) {
+    await new Promise(r => setTimeout(r, 5000))
     const number = '2349016105277'
     const code = await sock.requestPairingCode(number)
-    console.log(`Your pairing code: ${code}`)
+    console.log(`🔑 Your pairing code: ${code}`)
     console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
   }
+
   sock.ev.on('creds.update', saveCreds)
 
   sock.ev.on('group-participants.update', async ({ id, participants, action }) => {
@@ -179,7 +192,7 @@ if (!sock.authState.creds.registered) {
 
     if (cmd === 'download') {
       const songName = args.slice(1).join(' ')
-      if (!songName) {to
+      if (!songName) {
         await sock.sendMessage(from, { text: '🎵 Please provide a song name!\nExample: *!download Lonely At The Top*' })
         return
       }
@@ -204,5 +217,5 @@ if (!sock.authState.creds.registered) {
 }
 
 startBot()
-const http = require('http')
+
 http.createServer((req, res) => res.end('Bot is running!')).listen(process.env.PORT || 3000)
