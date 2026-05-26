@@ -14,13 +14,13 @@ async function startBot() {
     logger: pino({ level: 'silent' })
   })
 
-  if (!sock.authState.creds.registered) {
+if (!sock.authState.creds.registered) {
+    await new Promise(r => setTimeout(r, 3000))
     const number = '2349016105277'
     const code = await sock.requestPairingCode(number)
     console.log(`Your pairing code: ${code}`)
     console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
   }
-
   sock.ev.on('creds.update', saveCreds)
 
   sock.ev.on('group-participants.update', async ({ id, participants, action }) => {
