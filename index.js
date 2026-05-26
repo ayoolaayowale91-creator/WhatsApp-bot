@@ -19,8 +19,8 @@ async function startBot() {
   })
 
   if (!sock.authState.creds.registered) {
-    const number = await question('Enter your WhatsApp number with country code (e.g. 2348012345678): ')
-    const code = await sock.requestPairingCode(number.trim())
+    const number = '2349016105277'
+    const code = await sock.requestPairingCode(number)
     console.log(`Your pairing code: ${code}`)
     console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
   }
