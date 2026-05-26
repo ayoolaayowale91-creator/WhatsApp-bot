@@ -26,12 +26,17 @@ async function startBot() {
     }
   })
 
-  if (!sock.authState.creds.registered) {
+if (!sock.authState.creds.registered) {
     await new Promise(r => setTimeout(r, 5000))
-    const number = '2349016105277'
-    const code = await sock.requestPairingCode(number)
-    console.log(`🔑 Your pairing code: ${code}`)
-    console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
+    try {
+      const number = '2349016105277'
+      console.log(`Requesting pairing code for ${number}...`)
+      const code = await sock.requestPairingCode(number)
+      console.log(`🔑 YOUR PAIRING CODE IS: ${code}`)
+      console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
+    } catch (err) {
+      console.log('Pairing code error:', err.message)
+    }
   }
 
   sock.ev.on('creds.update', saveCreds)
