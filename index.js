@@ -179,7 +179,7 @@ if (!sock.authState.creds.registered) {
 
     if (cmd === 'download') {
       const songName = args.slice(1).join(' ')
-      if (!songName) {
+      if (!songName) {to
         await sock.sendMessage(from, { text: '🎵 Please provide a song name!\nExample: *!download Lonely At The Top*' })
         return
       }
@@ -204,3 +204,5 @@ if (!sock.authState.creds.registered) {
 }
 
 startBot()
+const http = require('http')
+http.createServer((req, res) => res.end('Bot is running!')).listen(process.env.PORT || 3000)
