@@ -1,17 +1,19 @@
 {
-  "name": "whatsapp-bot",
+  "name": "whatsapp-bot-render",
   "version": "1.0.0",
+  "description": "WhatsApp Bot with Pairing Code - Optimized for Render",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "build": "apt-get update && apt-get install -y chromium-browser && rm -rf /var/lib/apt/lists/*"
   },
   "dependencies": {
     "whatsapp-web.js": "^1.29.0",
-    "qrcode-terminal": "^0.12.0",
-    "axios": "^1.7.0"
+    "axios": "^1.7.7",
+    "http": "^0.0.1-security"
   },
   "engines": {
-    "node": "18.x"
+    "node": "18.x || 20.x"
   }
 }
