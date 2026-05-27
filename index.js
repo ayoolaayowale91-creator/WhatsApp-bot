@@ -17,27 +17,32 @@ async function startBot() {
 
   sock.ev.on('connection.update', async (update) => {
     const { connection } = update
+
     if (connection === 'open') {
       console.log('✅ Connected to WhatsApp!')
     }
+
     if (connection === 'close') {
-      console.log('🔄 Connection closed, reconnecting...')
+      console.log('🔄 Reconnecting...')
       startBot()
     }
-  })
 
-if (!sock.authState.creds.registered) {
-    await new Promise(r => setTimeout(r, 5000))
-    try {
-      const number = '2349016105277'
-      console.log(`Requesting pairing code for ${number}...`)
-      const code = await sock.requestPairingCode(number)
-      console.log(`🔑 YOUR PAIRING CODE IS: ${code}`)
-      console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
-    } catch (err) {
-      console.log('Pairing code error:', err.message)
+    if (connection === 'connecting') {
+      console.log('⏳ Connecting to WhatsApp...')
+      if (!sock.authState.creds.registered) {
+        await new Promise(r => setTimeout(r, 8000))
+        try {
+          const number = '2349016105277'
+          console.log(`Requesting pairing code for ${number}...`)
+          const code = await sock.requestPairingCode(number)
+          console.log(`🔑 YOUR PAIRING CODE IS: ${code}`)
+          console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
+        } catch (err) {
+          console.log('Pairing code error:', err.message)
+        }
+      }
     }
-  }
+  })
 
   sock.ev.on('creds.update', saveCreds)
 
@@ -206,57 +211,4 @@ if (!sock.authState.creds.registered) {
         const searchRes = await axios.get(`https://api.fabdl.com/youtube/search?q=${encodeURIComponent(songName)}`)
         const video = searchRes.data.result?.[0]
         if (!video) { await sock.sendMessage(from, { text: `❌ Could not find *${songName}*. Try a different name!` }); return }
-        const dlRes = await axios.get(`https://api.fabdl.com/youtube/mp3?id=${video.id}`)
-        const taskId = dlRes.data.result?.id
-        await new Promise(r => setTimeout(r, 5000))
-        const trackRes = await axios.get(`https://api.fabdl.com/youtube/mp3/track-info?id=${video.id}&tid=${taskId}`)
-        const downloadUrl = trackRes.data.result?.download_url
-        if (!downloadUrl) { await sock.sendMessage(from, { text: `❌ Download failed for *${songName}*. Try again!` }); return }
-        await sock.sendMessage(from, { audio: { url: downloadUrl }, mimetype: 'audio/mpeg', fileName: `${songName}.mp3` })
-      } catch (e) {
-        await sock.sendMessage(from, { text: `❌ Download failed. Try again later!` })
-      }
-    }
-
-  })
-}
-
-async function startBot() {
-  const { state, saveCreds } = await useMultiFileAuthState('auth_info')
-
-  const sock = makeWASocket({
-    auth: state,
-    printQRInTerminal: false,
-    logger: pino({ level: 'silent' })
-  })
-
-  sock.ev.on('connection.update', async (update) => {
-    const { connection, lastDisconnect } = update
-
-    if (connection === 'open') {
-      console.log('✅ Connected to WhatsApp!')
-    }
-
-    if (connection === 'close') {
-      console.log('🔄 Reconnecting...')
-      startBot()
-    }
-
-    if (connection === 'connecting') {
-      console.log('⏳ Connecting to WhatsApp...')
-      if (!sock.authState.creds.registered) {
-        await new Promise(r => setTimeout(r, 8000))
-        try {
-          const number = '2349016105277'
-          console.log(`Requesting pairing code for ${number}...`)
-          const code = await sock.requestPairingCode(number)
-          console.log(`🔑 YOUR PAIRING CODE IS: ${code}`)
-          console.log('Go to WhatsApp > Linked Devices > Link a Device > Link with phone number')
-        } catch (err) {
-          console.log('Pairing code error:', err.message)
-        }
-      }
-    }
-  })
-
-http.createServer((req, res) => res.end('Bot is running!')).listen(process.env.PORT || 3000)
+        const dlRes = await axios.get(`https://api.fabdl.com/youtube/mp3?id=${vid
